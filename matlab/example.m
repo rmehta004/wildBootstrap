@@ -1,4 +1,4 @@
-addpath('util')
+addpath('matlab/util')
 n = 1000;
 rng(2)
 

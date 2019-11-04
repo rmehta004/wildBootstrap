@@ -22,7 +22,7 @@
 % * **quantile** : test critical value.
 % * **reject**  : 1 iff null hypothesis is rejected by the test.     
 function [results] = wildHSIC(X,Y,varargin)
-addpath('util')
+addpath('matlab/util')
 
 okargs =   {'TestType','Alpha', 'Kernel_X','Kernel_Y' ,'WildBootstrap','NumBootstrap'};
 defaults = {true,0.05, rbf_dot(X),rbf_dot(Y),@bootstrap_series_2, 300};

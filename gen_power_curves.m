@@ -1,8 +1,7 @@
 % Experiment parameters.
-sampleSizes = 10:10:20;
-numSims=35;
+sampleSizes = 110:100:510;
 alpha=0.05;
-processes = ["indep_ar1"];
+processes = ["indep_ar1", "corr_ar1", "econometric_proc", "dynamic_proc"];
 
 % Setup.
 % Determine where your m-file's folder is.
@@ -11,33 +10,36 @@ folder = fileparts(which(mfilename));
 addpath(genpath(folder));
 rng('default')
 tic
-powers = zeros(length(sampleSizes),1);
+powers = zeros(length(sampleSizes), 2);
 
+pool = parpool;
 for process = processes
     
     dat = load(sprintf('data/%s_data.mat', process));
+    fprintf("PROCESS: %s\n", process);
 
     % Load data generated in Python.
     X_full = dat.X_full;
     Y_full = dat.Y_full;
+    numSims = size(X_full, 2);
 
-    pool = parpool;
     parfor i = 1:length(sampleSizes)
         tic
         n = sampleSizes(i);
-        partialResults = zeros(numSims,1);
-        bootstrapedValuesShift=[];
+        fprintf("SAMPLE_SIZE: %d\n", n);
+        partialResults = zeros(numSims, 1);
 
         for s=1:numSims
             X = X_full(1:n, s);
             Y = Y_full(1:n, s);
-            result = wildHSIC(X,Y) 
-            partialResults(i) = result.reject;
+            result = wildHSIC(X,Y); 
+            partialResults(s) = result.reject;
         end           
         toc
-        powers(i) = mean(partialResults,1);
+        powers(i, :) = [n, mean(partialResults)];
     end
     filename = sprintf("power_curves/wildHSIC_powers_%s.mat", process);
+    disp(powers)
     save(filename,'powers')
 end
 toc
